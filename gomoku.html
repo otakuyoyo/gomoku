@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>五子棋遊戲</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        td {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000;
+            font-size: 24px;
+        }
+        .X {
+            color: darkblue;
+        }
+        .O {
+            color: lightblue;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">五子棋遊戲</h1>
+    <table id="board"></table>
+    <div style="text-align: center;">
+        <button onclick="restartGame()">重新開始</button>
+        <p id="status"></p>
+    </div>
+    <script>
+        const size = 10;
+        let board = [];
+        let currentPlayer = 'X';
+        let gameOver = false;
+
+        function createBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.innerHTML = '';
+            board = Array(size).fill(null).map(() => Array(size).fill(''));
+            for (let i = 0; i < size; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < size; j++) {
+                    const cell = document.createElement('td');
+                    cell.addEventListener('click', () => makeMove(i, j));
+                    row.appendChild(cell);
+                }
+                boardElement.appendChild(row);
+            }
+            document.getElementById('status').textContent = `現在輪到玩家 ${currentPlayer}`;
+        }
+
+        function makeMove(row, col) {
+            if (gameOver || board[row][col] !== '') return;
+            board[row][col] = currentPlayer;
+            const cell = document.getElementById('board').rows[row].cells[col];
+            cell.textContent = currentPlayer;
+            cell.classList.add(currentPlayer);
+
+            if (checkWin(row, col)) {
+                document.getElementById('status').textContent = `玩家 ${currentPlayer} 獲勝！`;
+                gameOver = true;
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                document.getElementById('status').textContent = `現在輪到玩家 ${currentPlayer}`;
+            }
+        }
+
+        function checkWin(row, col) {
+            const directions = [
+                { x: 1, y: 0 }, { x: 0, y: 1 },
+                { x: 1, y: 1 }, { x: 1, y: -1 }
+            ];
+            const player = board[row][col];
+
+            for (const { x, y } of directions) {
+                let count = 1;
+                for (let i = 1; i < 5; i++) {
+                    const newRow = row + i * y;
+                    const newCol = col + i * x;
+                    if (newRow >= 0 && newRow < size && newCol >= 0 && newCol < size && board[newRow][newCol] === player) {
+                        count++;
+                    } else {
+                        break;
+                    }
+                }
+                for (let i = 1; i < 5; i++) {
+                    const newRow = row - i * y;
+                    const newCol = col - i * x;
+                    if (newRow >= 0 && newRow < size && newCol >= 0 && newCol < size && board[newRow][newCol] === player) {
+                        count++;
+                    } else {
+                        break;
+                    }
+                }
+                if (count >= 5) return true;
+            }
+            return false;
+        }
+
+        function restartGame() {
+            currentPlayer = 'X';
+            gameOver = false;
+            createBoard();
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
